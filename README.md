@@ -8,9 +8,10 @@ https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week6_2nd_sess
 https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week7_1.ipynb
 
 #week7e2   convolutional neural network to solve an image classification problem, using the CIFAR-10 dataset
-https://github.com/ULUGBEK12194914/AI_application/blob/main/week7e2.ipynb
+https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week7_2.ipynb
 
-#week7e3(This code example is very similar to week7e2 but the network is modified to use a more complex network) https://github.com/ULUGBEK12194914/AI_application/blob/main/week7e3.ipynb
+#week7e3 almost same as week7-2 but the network is modified to use more complex network
+https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week7_3.ipynb
 
 
 #Linear Regression using TensorFlow
