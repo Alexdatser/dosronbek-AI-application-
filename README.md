@@ -506,4 +506,5 @@ plt.legend()
 plt.show()
 ```
 Output image:
+
 ![image](https://user-images.githubusercontent.com/81208782/200542608-a1c902b5-768c-49e9-a324-7f9be94470b4.png)
