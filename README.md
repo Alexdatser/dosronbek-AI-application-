@@ -1,20 +1,71 @@
-#week6 Linear Regression 
-https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/LinearRegression(week6).ipynb
-
-#week6 Session2
-https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week6_2nd_session.ipynb
-
-#week7e1 how to access the CIFAR-10 dataset and display the image with index 100
-https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week7_1.ipynb
-
-#week7e2   convolutional neural network to solve an image classification problem, using the CIFAR-10 dataset
-https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week7_2.ipynb
-
-#week7e3 almost same as week7-2 but the network is modified to use more complex network
-https://github.com/Alexdatser/dosronbek-AI-application-/blob/main/week7_3.ipynb
+### week 3
+```bash 
+week 3 activities of class , Installing tensorflow
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%203
 
 
-#Linear Regression using TensorFlow
+### week 4
+```bash 
+Activities we did in week 4 ( google collab introduction with some installations)
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%204
+
+
+### week5
+```bash
+Translow basic operations done in week 5 class
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%204
+
+
+### week6 
+``` bash 
+Linear Regression
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%206
+
+
+### week7
+```bash how to access the CIFAR-10 dataset and display the image with index 100
+convolutional neural network to solve an image classification problem, using the CIFAR-10 dataset 
+almost same as week7-2 but the network is modified to use more complex network
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%207
+
+
+### week 8
+```bash 
+In this week we did midterm exam and for exam i submittied all weekly assignments as usual
+but I did not create a new reprosotory for midterm itself since all weekly assigmnetnts i did so far can be 
+a work of midterm
+```
+
+
+### week 9
+```bash 
+Creating and training the tensorflow in week 9
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%209
+
+
+### week 10
+```bash 
+working with torch and loading , preprocessing the image in week 10
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%2010
+
+
+### week 11
+```bash
+In this week we worked on some dataset like Plot dataset and Plot naive prediction
+with the book sales dataset exel file 
+```
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%2011
+
+
+
+# Linear Regression using TensorFlow
 
 ```bash
 # First install the tensorFlow version 1.15.5
@@ -218,5 +269,53 @@ Epochs 280.000000 Cost 0.061313 Weight 6.037417 Bias -0.201694
 
 ![image](https://user-images.githubusercontent.com/81208782/197144390-f43e092e-1e4f-481a-a6e1-4763a389805a.png)
 
-## week 10 activity
-https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%2010
+### week 10 activity
+```bash
+import torch
+import torchvision
+from torchvision import transforms
+from PIL import Image
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+```
+
+```bash 
+# Load and preprocess image.
+image=Image.open(r"RUS.jpg")
+preprocess=transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(),transforms.Normalize(mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])])
+input_tensor = preprocess(image)
+
+# Convert to 4-dimensional tensor.
+inputs=input_tensor.unsqueeze(0)
+```
+
+``` bash
+# Load the pre—trained model. 
+model = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.IMAGENET1K_V1) 
+# model = torchvision.models.resnet50(weights=torchvision.models.ResNet5O_Weights.IMAGENET1K_V1) 
+model.eval() 
+# Transfer model to GPU. 
+model.to(device) 
+# Do prediction. 
+inputs = inputs.to(device) 
+with torch.no_grad(): 
+  outputs = model(inputs) 
+# Convert to probabilities, since final SoftMax activation is not in pretrained model. 
+probabilities = torch.nn.functional.softmax(outputs[0], dim=0) 
+# Print class ID for top 5 predictions. 
+_, indices = torch.sort(probabilities, descending=True) 
+for i in range(0, 5): 
+  print('ImageNet class:', indices[i].item(), ', probability = %4.3f' % probabilities[indices[i]].item()) 
+# Show image. 
+image.show()
+```
+Here is the output
+```bash
+Downloading: "https://download.pytorch.org/models/resnet50-0676ba61.pth" to /root/.cache/torch/hub/checkpoints/resnet50-0676ba61.pth
+  0%|          | 0.00/97.8M [00:00, ?B/s]
+ImageNet class: 617 , probability = 0.154
+ImageNet class: 834 , probability = 0.088
+ImageNet class: 652 , probability = 0.084
+ImageNet class: 906 , probability = 0.062
+ImageNet class: 457 , probability = 0.045
+```
