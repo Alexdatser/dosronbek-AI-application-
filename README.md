@@ -319,3 +319,191 @@ ImageNet class: 652 , probability = 0.084
 ImageNet class: 906 , probability = 0.062
 ImageNet class: 457 , probability = 0.045
 ```
+### Activity that has been done in week 11
+``` bash
+import requests
+# Save datagenerators as file to colab working directory
+# If you are using GitHub, make sure you get the "Raw" version of the code
+url = 'https://raw.githubusercontent.com/NVDLI/LDL/main/pt_framework/utilities.py'
+r = requests.get(url)
+# make sure your filename is the same as how you want to import
+with open('utilities.py','w') as f:
+  f.write(r.text)
+```
+
+``` bash 
+import torch
+import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
+import numpy as np
+import matplotlib.pyplot as plt
+from utilities import train_model
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+EPOCHS = 100
+BATCH_SIZE = 16
+
+TRAIN_TEST_SPLIT = 0.8
+MIN = 12
+FILE_NAME = 'book_store_sales.csv'
+
+def readfile(file_name):
+    file = open(file_name, 'r', encoding='utf-8')
+    next(file)
+    data = []
+    for line in (file):
+        values = line.split(',')
+        data.append(float(values[1]))
+    file.close()
+    return np.array(data, dtype=np.float32)
+
+# Read data and split up into train and test data.
+sales = readfile(FILE_NAME)
+months = len(sales)
+split = int(months * TRAIN_TEST_SPLIT)
+train_sales = sales[0:split]
+test_sales = sales[split:]
+```
+
+```bash
+# Plot dataset
+x = range(len(sales))
+plt.plot(x, sales, 'r-', label='book sales')
+plt.title('Book store sales')
+plt.axis([0, 339, 0.0, 3000.0])
+plt.xlabel('Months')
+plt.ylabel('Sales (millions $)')
+plt.legend()
+plt.show()
+```
+Here is the output data
+
+![image](https://user-images.githubusercontent.com/81208782/200541502-b6f1cdf4-dc97-452a-bb68-bd7b8909349a.png)
+
+```bash
+# Plot naive prediction
+test_output = test_sales[MIN:]
+naive_prediction = test_sales[MIN-1:-1]
+x = range(len(test_output))
+plt.plot(x, test_output, 'g-', label='test_output')
+plt.plot(x, naive_prediction, 'm-', label='naive prediction')
+plt.title('Book store sales')
+plt.axis([0, len(test_output), 0.0, 3000.0])
+plt.xlabel('months')
+plt.ylabel('Monthly book store sales')
+plt.legend()
+plt.show()
+```
+Here is the output of this code
+
+![image](https://user-images.githubusercontent.com/81208782/200541656-377a0999-7caf-449f-89ba-1b81167fbd78.png)
+
+```bash
+# Standardize train and test data.
+# Use only training seasons to compute mean and stddev.
+mean = np.mean(train_sales)
+stddev = np.std(train_sales)
+train_sales_std = (train_sales - mean)/stddev
+test_sales_std = (test_sales - mean)/stddev
+```
+
+```bash
+# Create train examples.
+train_months = len(train_sales)
+train_X = np.zeros((train_months-MIN, train_months-1, 1), dtype=np.float32)
+train_y = np.zeros((train_months-MIN, 1), dtype=np.float32)
+for i in range(0, train_months-MIN):
+    train_X[i, -(i+MIN):, 0] = train_sales_std[0:i+MIN]
+    train_y[i, 0] = train_sales_std[i+MIN]
+
+# Create test examples.
+test_months = len(test_sales)
+test_X = np.zeros((test_months-MIN, test_months-1, 1), dtype=np.float32)
+test_y = np.zeros((test_months-MIN, 1), dtype=np.float32)
+for i in range(0, test_months-MIN):
+    test_X[i, -(i+MIN):, 0] = test_sales_std[0:i+MIN]
+    test_y[i, 0] = test_sales_std[i+MIN]
+
+# Create Dataset objects.
+trainset = TensorDataset(torch.from_numpy(train_X).clone(), torch.from_numpy(train_y))
+testset = TensorDataset(torch.from_numpy(test_X).clone(), torch.from_numpy(test_y))
+```
+
+```bash
+# Custom layer that retrieves only last time step from RNN output.
+class LastTimestep(nn.Module):
+    def forward(self, inputs):
+        return inputs[1][0]
+
+# Create RNN model
+model = nn.Sequential(
+    nn.RNN(1, 128, nonlinearity='relu', batch_first=True),
+    LastTimestep(),
+    nn.Linear(128, 1)
+)
+
+# Loss function and optimizer.
+optimizer = torch.optim.Adam(model.parameters())
+loss_function = nn.MSELoss()
+
+# Train model.
+train_model(model, device, EPOCHS, BATCH_SIZE, trainset, testset,
+            optimizer, loss_function, 'mae')
+```
+Output of this code
+
+```bash
+Epoch 1/100 loss: 0.9439 - mae: 0.7205 - val_loss: 1.1952 - val_mae: 0.8513
+Epoch 2/100 loss: 0.8227 - mae: 0.6574 - val_loss: 1.0075 - val_mae: 0.7842
+Epoch 3/100 loss: 0.6335 - mae: 0.5761 - val_loss: 0.7412 - val_mae: 0.6464....
+
+
+...Epoch 99/100 loss: 0.0283 - mae: 0.1248 - val_loss: 0.0548 - val_mae: 0.1368
+Epoch 100/100 loss: 0.0248 - mae: 0.1153 - val_loss: 0.0567 - val_mae: 0.1423
+[0.11530081007410498, 0.14234759286046028]
+```
+
+```bash
+# Create naive prediction based on standardized data.
+test_output = test_sales_std[MIN:]
+naive_prediction = test_sales_std[MIN-1:-1]
+mean_squared_error = np.mean(np.square(naive_prediction
+                                       - test_output))
+mean_abs_error = np.mean(np.abs(naive_prediction
+                                - test_output))
+print('naive test mse: ', mean_squared_error)
+print('naive test mean abs: ', mean_abs_error)
+```
+Output:
+```bash
+naive test mse:  0.47174773
+naive test mean abs:  0.48024118
+```
+
+```bash
+# Use trained model to predict the test data
+inputs = torch.from_numpy(test_X)
+inputs = inputs.to(device)
+outputs = model(inputs)
+predicted_test = outputs.cpu().detach().numpy()
+
+# De-standardize output.
+predicted_test = np.reshape(predicted_test,
+                            (len(predicted_test)))
+predicted_test = predicted_test * stddev + mean
+
+# Plot test prediction.
+x = range(len(test_sales)-MIN)
+plt.plot(x, predicted_test, 'm-',
+         label='predicted test_output')
+plt.plot(x, test_sales[-(len(test_sales)-MIN):],
+         'g-', label='actual test_output')
+plt.title('Book sales')
+plt.axis([0, 55, 0.0, 3000.0])
+plt.xlabel('months')
+plt.ylabel('Predicted book sales')
+plt.legend()
+plt.show()
+```
+Output image:
+![image](https://user-images.githubusercontent.com/81208782/200542608-a1c902b5-768c-49e9-a324-7f9be94470b4.png)
