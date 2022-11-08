@@ -218,3 +218,5 @@ Epochs 280.000000 Cost 0.061313 Weight 6.037417 Bias -0.201694
 
 ![image](https://user-images.githubusercontent.com/81208782/197144390-f43e092e-1e4f-481a-a6e1-4763a389805a.png)
 
+## week 10 activity
+https://github.com/Alexdatser/dosronbek-AI-application-/tree/main/week%2010
